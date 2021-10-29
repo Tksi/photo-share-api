@@ -1,0 +1,11 @@
+{
+  "main": "idnex.js",
+  "dependencies": {
+    "apollo-server": "^3.4.0",
+    "graphql": "^15.7.2",
+    "nodemon": "^2.0.14"
+  },
+  "scripts": {
+    "start": "nodemon -e js,json,graphql"
+  }
+}
