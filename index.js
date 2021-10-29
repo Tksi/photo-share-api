@@ -12,7 +12,6 @@ const typeDefs = `
     description: String
   }
 
-
   type Query {
     totalPhotos: Int!
     allPhotos: [Photo!]!
@@ -38,6 +37,11 @@ const resolvers = {
       photos.push(newPhoto);
       return newPhoto;
     },
+  },
+  // Photo型が呼ばれたときに実行されるっぽい(データそを書き換えてはいない)
+  Photo: {
+    // parentはPhotoオブジェト自体
+    url: (parent) => `http://example.com/img/${parent.id}.jpg`,
   },
 };
 
