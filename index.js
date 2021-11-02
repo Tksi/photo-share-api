@@ -1,4 +1,5 @@
 import { ApolloServer } from 'apollo-server';
+import { GraphQLScalarType } from 'graphql';
 
 let _id = 0; //idのインクリメント用
 const users = [
@@ -13,12 +14,14 @@ const photos = [
     description: 'The heart chute is one of my favorite chutes',
     category: 'ACTION',
     githubUser: 'gPlake',
+    created: '3-28-1977',
   },
   {
     id: '2',
     name: 'Enjoying the sunshine',
     category: 'SELFIE',
     githubUser: 'sSchmidt',
+    created: '3-28-1977',
   },
   {
     id: '3',
@@ -26,6 +29,7 @@ const photos = [
     description: '25 laps on gunbarrel today',
     category: 'LANDSCAPE',
     githubUser: 'sSchmidt',
+    created: '2018-04-15T19:09:57.308Z',
   },
 ];
 const tags = [
@@ -37,6 +41,8 @@ const tags = [
 
 // スキーマ : データの要件
 const typeDefs = `
+  scalar DateTime
+
   enum PhotoCategory {
     SELFIE
     PORTRAIT
@@ -61,11 +67,12 @@ const typeDefs = `
     category: PhotoCategory!
     postedBy: User!
     taggedUsers: [User!]!
+    created: DateTime!
   }
 
   type Query {
     totalPhotos: Int!
-    allPhotos: [Photo!]!
+    allPhotos(after: DateTime): [Photo!]!
   }
 
   input PostPhotoInput {
@@ -83,7 +90,7 @@ const typeDefs = `
 const resolvers = {
   Query: {
     totalPhotos: () => photos.length,
-    allPhotos: () => photos,
+    allPhotos: photos,
   },
 
   Mutation: {
@@ -91,6 +98,7 @@ const resolvers = {
       const newPhoto = {
         id: _id++,
         ...args.input,
+        created: new Date(),
       };
       photos.push(newPhoto);
       return newPhoto;
@@ -121,6 +129,14 @@ const resolvers = {
         .map((tag) => tag.photoID)
         .map((photoID) => photos.find((photo) => photo.id === photoID)),
   },
+
+  DateTime: new GraphQLScalarType({
+    name: 'DateTime',
+    description: 'A valide date time value.',
+    parseValue: (value) => new Date(value),
+    serialize: (value) => new Date(value).toISOString(),
+    parseLiteral: (ast) => ast.value,
+  }),
 };
 
 new ApolloServer({ typeDefs, resolvers })
