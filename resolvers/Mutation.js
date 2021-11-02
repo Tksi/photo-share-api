@@ -1,11 +1,11 @@
 export const Mutation = {
-  postPhoto: (parent, args) => {
+  postPhoto: async (parent, args, { db }) => {
     const newPhoto = {
-      id: _id++,
+      id: (await db.collection('photos').estimatedDocumentCount()) + 1,
       ...args.input,
       created: new Date(),
     };
-    photos.push(newPhoto);
+    db.collection('photos').insert(newPhoto);
     return newPhoto;
   },
 };
