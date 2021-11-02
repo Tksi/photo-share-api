@@ -28,6 +28,12 @@ const photos = [
     githubUser: 'sSchmidt',
   },
 ];
+const tags = [
+  { photoID: '1', userID: 'gPlake' },
+  { photoID: '2', userID: 'sSchmidt' },
+  { photoID: '2', userID: 'mHattrup' },
+  { photoID: '2', userID: 'gPlake' },
+];
 
 // スキーマ : データの要件
 const typeDefs = `
@@ -44,6 +50,7 @@ const typeDefs = `
     name: String
     avatar: String
     postedPhotos: [Photo!]!
+    inPhotos: [Photo!]!
   }
 
   type Photo {
@@ -53,6 +60,7 @@ const typeDefs = `
     description: String
     category: PhotoCategory!
     postedBy: User!
+    taggedUsers: [User!]!
   }
 
   type Query {
@@ -97,11 +105,21 @@ const resolvers = {
       console.log(parent);
       return users.find((user) => user.githubLogin === parent.githubUser);
     },
+    taggedUsers: (parent) =>
+      tags
+        .filter((tag) => tag.photoID === parent.id)
+        .map((tag) => tag.userID)
+        .map((userID) => users.find((user) => user.githubLogin === userID)),
   },
 
   User: {
     postedPhotos: (parent) =>
       photos.filtter((photo) => photo.githubUser === parent.githubLogin),
+    inPhotos: (parent) =>
+      tags
+        .filter((tag) => tag.userID === parent.id)
+        .map((tag) => tag.photoID)
+        .map((photoID) => photos.find((photo) => photo.id === photoID)),
   },
 };
 
